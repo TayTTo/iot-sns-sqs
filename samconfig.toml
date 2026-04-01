@@ -1,0 +1,8 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "iot-lambda-sns-sqs-lambda-ddb"
+resolve_s3 = true
+s3_prefix = "iot-lambda-sns-sqs-lambda-ddb"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
