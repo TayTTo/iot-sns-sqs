@@ -11,7 +11,7 @@ resource "aws_iam_role" "lambda_func_role" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Service = "lambda.amazonaws.com"
         }
       },
     ]
@@ -19,13 +19,73 @@ resource "aws_iam_role" "lambda_func_role" {
 }
 
 data "archive_file" "IoTMetricsEventProcessorFunction" {
-  type = "zip"
+  type        = "zip"
   source_file = "../src/processor/eventprocessor.js"
   output_path = "./archive/eventprocessor.zip"
 }
 
 data "archive_file" "AllFilteredEventConsumerFunction" {
-  type = "zip"
-  source_file = "../src/consumer/"
+  type        = "zip"
+  source_dir  = "../src/consumer/"
   output_path = "./archive/consumer.zip"
+}
+
+resource "aws_lambda_function" "IOT_metrics_event_processor_function" {
+  function_name = "IOT_metrics_event_processor_function"
+  role          = aws_iam_role.lambda_func_role.arn
+  filename      = data.archive_file.IoTMetricsEventProcessorFunction.output_path
+  handler       = "eventprocessor.handler"
+  runtime       = "nodejs16.x"
+  timeout       = 3
+  memory_size   = 128
+  environment {
+    variables = {
+      SNStopic = aws_sns_topic.sns-topic.arn
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
+  role       = aws_iam_role.lambda_func_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_sqs" {
+  role       = aws_iam_role.lambda_func_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}
+
+resource "aws_lambda_function" "consumer_function" {
+  function_name = "consumer_function"
+  role          = aws_iam_role.lambda_func_role.arn
+  filename      = data.archive_file.AllFilteredEventConsumerFunction.output_path
+  handler       = "allfilteredeventconsumer.handler"
+  runtime       = "nodejs16.x"
+  timeout       = 3
+  memory_size   = 128
+  environment {
+    variables = {
+      DatabaseTable = aws_dynamodb_table.IOT_DB.arn
+    }
+  }
+}
+
+resource "aws_iot_topic_rule" "iot_sensor_thing" {
+  name        = "IotSensorthing"
+  enabled     = true
+  sql         = "SELECT * FROM 'device/iotsensors'"
+  sql_version = "2016-03-23"
+  lambda {
+    function_arn = aws_lambda_function.IOT_metrics_event_processor_function.arn
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "map_sqs_queue" {
+  event_source_arn = aws_sqs_queue.sqs_queue["metric-sqs-queue"].arn
+  function_name    = aws_lambda_function.IOT_metrics_event_processor_function.arn
+  batch_size       = 10
+
+  scaling_config {
+    maximum_concurrency = 100
+  }
 }

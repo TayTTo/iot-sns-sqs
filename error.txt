@@ -1,0 +1,14 @@
+│ Error: creating Lambda Function (IOT_metrics_event_processor_function): operation error Lambda: CreateFunction, https response error StatusCode: 400, RequestID: 8a26ca7c-555c-47d4-b83a-b263f514fa16, InvalidParameterValueException: The role defined for the function cannot be assumed by Lambda.
+│
+│   with aws_lambda_function.IOT_metrics_event_processor_function,
+│   on lambdaFunction.tf line 33, in resource "aws_lambda_function" "IOT_metrics_event_processor_function":
+│   33: resource "aws_lambda_function" "IOT_metrics_event_processor_function" {
+│
+╵
+╷
+│ Error: creating Lambda Function (consumer_function): operation error Lambda: CreateFunction, https response error StatusCode: 400, RequestID: 895f86ca-01c7-45e9-98c7-2378f3899d03, InvalidParameterValueException: The role defined for the function cannot be assumed by Lambda.
+│
+│   with aws_lambda_function.consumer_function,
+│   on lambdaFunction.tf line 48, in resource "aws_lambda_function" "consumer_function":
+│   48: resource "aws_lambda_function" "consumer_function" {
+│
