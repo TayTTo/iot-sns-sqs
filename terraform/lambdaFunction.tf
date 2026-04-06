@@ -116,7 +116,7 @@ resource "aws_iot_topic_rule" "iot_sensor_thing" {
   sns {
     message_format = "JSON"
     role_arn       = aws_iam_role.iot_rule_role.arn
-    target_arn     = aws_iot_thing.IotSensorThing.arn
+    target_arn     = aws_sns_topic.sns-topic.arn
   }
 }
 
