@@ -55,6 +55,41 @@ resource "aws_iam_role_policy_attachment" "lambda_sqs" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
 }
 
+resource "aws_iam_role" "iot_rule_role" {
+  name = "IoTRuleToSNSRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "iot.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "iot_sns_policy" {
+  name = "IoTSNSPublishPolicy"
+  role = aws_iam_role.iot_rule_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:Publish"
+        ]
+        Resource = aws_sns_topic.sns-topic.arn
+      }
+    ]
+  })
+}
+
 resource "aws_lambda_function" "consumer_function" {
   function_name = "consumer_function"
   role          = aws_iam_role.lambda_func_role.arn
@@ -77,6 +112,11 @@ resource "aws_iot_topic_rule" "iot_sensor_thing" {
   sql_version = "2016-03-23"
   lambda {
     function_arn = aws_lambda_function.IOT_metrics_event_processor_function.arn
+  }
+  sns {
+    message_format = "JSON"
+    role_arn       = aws_iam_role.iot_rule_role.arn
+    target_arn     = aws_iot_thing.IotSensorThing.arn
   }
 }
 

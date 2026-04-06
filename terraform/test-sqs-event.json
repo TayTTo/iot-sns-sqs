@@ -1,0 +1,19 @@
+{
+    "Records": [
+        {
+            "messageId": "test-message-id",
+            "receiptHandle": "test-receipt-handle",
+            "body": "{\"Type\":\"Notification\",\"MessageId\":\"test-sns-id\",\"TopicArn\":\"arn:aws:sns:ap-southeast-1:905418148480:sns-topic\",\"Message\":\"{\\\"MetricType\\\":\\\"Temperature\\\",\\\"MetricValue\\\":\\\"18 C\\\",\\\"Location\\\":\\\"Bangalore\\\"}\",\"Timestamp\":\"2026-04-05T09:00:00.000Z\"}",
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1712304000000",
+                "ApproximateFirstReceiveTimestamp": "1712304000000"
+            },
+            "messageAttributes": {},
+            "md5OfBody": "test-md5",
+            "eventSource": "aws:sqs",
+            "eventSourceARN": "arn:aws:sqs:ap-southeast-1:905418148480:metric-sqs-queue",
+            "awsRegion": "ap-southeast-1"
+        }
+    ]
+}
