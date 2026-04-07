@@ -15,7 +15,7 @@ resource "aws_sqs_queue" "sqs_queue" {
 # SQS Queue Policy to allow SNS delivery
 resource "aws_sqs_queue_policy" "sqs_queue_policy" {
   for_each  = toset(var.queue_names)
-  queue_url = aws_sqs_queue.sqs_queue[each.key].id
+  queue_url = aws_sqs_queue.sqs_queue[each.value].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -27,7 +27,7 @@ resource "aws_sqs_queue_policy" "sqs_queue_policy" {
           Service = "sns.amazonaws.com"
         }
         Action   = "sqs:SendMessage"
-        Resource = aws_sqs_queue.sqs_queue[each.key].arn
+        Resource = aws_sqs_queue.sqs_queue[each.value].arn
         Condition = {
           StringEquals = {
             "aws:SourceArn" = aws_sns_topic.sns-topic.arn
