@@ -40,7 +40,7 @@ resource "aws_lambda_function" "IOT_metrics_event_processor_function" {
   memory_size   = 128
   environment {
     variables = {
-      SNStopic = aws_sns_topic.sns-topic.arn
+      SNStopic = aws_sns_topic.sns-topic.name
     }
   }
 }
@@ -100,7 +100,7 @@ resource "aws_lambda_function" "consumer_function" {
   memory_size   = 128
   environment {
     variables = {
-      DatabaseTable = aws_dynamodb_table.IOT_DB.arn
+      DatabaseTable = aws_dynamodb_table.IOT_DB.name
     }
   }
 }
